@@ -8,6 +8,7 @@ class Window;
 struct Vertex {
 	glm::vec3 position;
 	glm::vec3 normal;
+	glm::vec3 color = glm::vec3(1.f);
 
 };
 struct Index {
@@ -30,8 +31,7 @@ public:
 	int GetGridSize();
 	Vertex& GetVertex(int i, int j);
 	GLShader* GetShader();
-	
-
+	glm::vec3 getColor(double v, double vmin, double vmax);
 private:
 	void Init();
 	GLuint m_vbo, m_vao, m_ebo;

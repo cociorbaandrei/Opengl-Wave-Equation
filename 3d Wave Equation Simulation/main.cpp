@@ -34,8 +34,8 @@ int main()
 	window->setCallback(key_callback);
 	window->setCallback(mouse_callback);
 
-	int num = 30;
-	float worldLen = 10.f;
+	int num = 50;
+	float worldLen = 1.f;
 
 
 	MeshGrid* worldMesh = new MeshGrid(100, glm::vec3(1.f), "worldMeshShader.vert", "worldMeshShader.frag");
@@ -45,7 +45,7 @@ int main()
 
 
 	glm::vec3 lightPos = glm::vec3(0.f, 1.1f, 0.f);
-	MeshGrid* mesh = new MeshGrid(num, glm::vec3(220.0 / 255.0, 220.0 / 225.0, 220.0 / 225.0), "shader.vert", "shader.frag");
+	MeshGrid* mesh = new MeshGrid(num, glm::vec3(0.f, 1.f, 0.f), "shader.vert", "shader.frag");
 	mesh->Translate(glm::vec3(0.f, 1.f, 0.f))->Scale(glm::vec3(worldLen / num));
 	mesh->GetShader()->useProgram();
 	mesh->RecalculateNormals();
@@ -71,21 +71,30 @@ int main()
 		for (int j = 1; j < mesh->GetGridSize()-1; j++) {
 		
 			int x = i, y = j;
-			float ampl = -1.6f;
+			float ampl = 19.6f;
 			float x0 = num / 2;
 			float y0 = num / 2;
-			float theta = .8f;
+			float theta = 3.8f;
+
 			u[0][i][j] = ampl * exp(-((x-x0)*(x-x0)/2/theta/theta+(y-y0)*(y-y0)/2/theta/theta));
-			u[0][i][j] = (ampl - .3) * exp(-((x - x0)*(x - x0) / 2 / theta / theta + (y - y0)*(y - y0) / 2 / theta / theta));
+			u[1][i][j] = (ampl - .3) * exp(-((x - x0)*(x - x0) / 2 / theta / theta + (y - y0)*(y - y0) / 2 / theta / theta));
+
+			y0 = num - y0;
+			x0 = num - x0;
+
+			//u[0][i][j] += -ampl * exp(-((x - x0)*(x - x0) / 2 / theta / theta + (y - y0)*(y - y0) / 2 / theta / theta));
+			//u[1][i][j] += (-ampl - .3) * exp(-((x - x0)*(x - x0) / 2 / theta / theta + (y - y0)*(y - y0) / 2 / theta / theta));
 		}
 	}
 
+
 	int currentTime = 1;
-	float damping = 150, waveSpeed = 2.9;
+	float damping = 0, waveSpeed = .5;
 	float dh = .002f;
 	float dt = .0001f;
-	float timmer = 1.f;
-	float timmer2 = 4.f;
+	float timmer = 10000.f;
+	float timmer2 = 8.f;
+	float minu = 1000;
 	while (window->running())
 	{
 		window->poolEvents();
@@ -120,7 +129,7 @@ int main()
 					u[1 - currentTime][x][y] = 2 * u[currentTime][x][y] - u[1 - currentTime][x][y] + (dt * (u[currentTime][x + 1][y] - 2 * u[currentTime][x][y] + u[currentTime][x - 1][y]) / dh + dt * (u[currentTime][x][y + 1] - 2 * u[currentTime][x][y] + u[currentTime][x][y - 1]) / dh - dt * 2 * damping *(u[currentTime][x][y] - u[1 - currentTime][x][y])) * waveSpeed;
 					position.y = u[1 - currentTime][x][y];
 					mesh->GetVertex(i, j).position = position;
-
+					mesh->GetVertex(i, j).color = mesh->getColor(position.y, -2,2);
 				}
 			}
 			timmer2 = 0.001f;
@@ -134,7 +143,7 @@ int main()
 		
 		window->setWireframeMode(true);
 		worldMesh->Draw(window, mainCamera);
-		window->setWireframeMode(false);
+		//window->setWireframeMode(false);
 		
 		window->swapBuffers();
 	}

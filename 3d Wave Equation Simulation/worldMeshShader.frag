@@ -8,5 +8,5 @@ out vec4 color;
 
 void main()
 {    
-	color = vec4(Color * .2f, 1.0f);
+	color = vec4(Color * .08f, 1.0f);
 }

@@ -122,6 +122,37 @@ GLShader * MeshGrid::GetShader()
 	return m_shader;
 }
 
+glm::vec3 MeshGrid::getColor(double v, double vmin, double vmax)
+{
+	double dv;
+	float r =1.f, g = 1.f, b = 1.f;
+	if (v < vmin)
+		v = vmin;
+	if (v > vmax)
+		v = vmax;
+	dv = vmax - vmin;
+
+	if (v < (vmin + 0.25 * dv)) {
+		r = 0;
+		g = 4 * (v - vmin) / dv;
+	}
+	else if (v < (vmin + 0.5 * dv)) {
+		r = 0;
+		b = 1 + 4 * (vmin + 0.25 * dv - v) / dv;
+	}
+	else if (v < (vmin + 0.75 * dv)) {
+		r = 4 * (v - vmin - 0.5 * dv) / dv;
+		b = 0;
+	}
+	else {
+		g = 1 + 4 * (vmin + 0.75 * dv - v) / dv;
+		b = 0;
+	}
+
+	return glm::vec3(r, g, b);
+}
+
+
 void MeshGrid::Init()
 {
 	m_vertices.resize(m_grid_size * m_grid_size);
@@ -133,6 +164,7 @@ void MeshGrid::Init()
 			position.y = 0;
 			position.z = (float)j;
 			m_vertices[i * (m_grid_size)+j].position = position;
+			m_vertices[i * (m_grid_size)+j].color = m_color;
 		}
 	}
 	for (int i = 0; i < m_grid_size - 1; i++) {
@@ -172,6 +204,9 @@ void MeshGrid::Init()
 
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, normal));
+
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, color));
 
 	glBindVertexArray(0);
 }
