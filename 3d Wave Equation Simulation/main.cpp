@@ -10,16 +10,9 @@
 #include <math.h>
 
 
-int random(int min, int max) //range : [min, max)
-{
-	static bool first = true;
-	if (first)
-	{
-		srand(time(NULL)); //seeding for the first time only!
-		first = false;
-	}
-	return min + rand() % (max - min);
-}
+
+
+double normalizedX,  normalizedY;
 GLfloat deltaTime = .0f;
 GLfloat lastFrame = .0f;
 GLfloat lastX = 400, lastY = 300, yaw, pitch;
@@ -28,6 +21,7 @@ bool keys[1024];
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void mouse_callback(GLFWwindow * window, double xpos, double ypos);
 void do_movement();
+int random(int min, int max);
 Window* window = new Window(800, 600, "Mesh");
 
 
@@ -41,7 +35,7 @@ int main()
 	window->setCallback(mouse_callback);
 
 	int num = 30;
-	float worldLen = 1.f;
+	float worldLen = 10.f;
 
 
 	MeshGrid* worldMesh = new MeshGrid(100, glm::vec3(1.f), "worldMeshShader.vert", "worldMeshShader.frag");
@@ -103,6 +97,7 @@ int main()
 	
 		do_movement();
 
+		
 		if (timmer <= deltaTime) {
 			
 			u[currentTime][random(1, num)][random(1, num)] = -.4;
@@ -183,15 +178,29 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	}
 
 }
+
 void mouse_callback(GLFWwindow * _window, double xpos, double ypos)
 {
-	
-		GLfloat xoffset = (GLfloat)xpos - lastX;
-		GLfloat yoffset = lastY - (GLfloat)ypos;
-		lastX = (GLfloat)xpos;
-		lastY = (GLfloat)ypos;
+
+	normalizedX = -1.0 + 2.0 * xpos / window->dimensions().x;
+	normalizedY = 1.0 - 2.0 * ypos / window->dimensions().y;
+	GLfloat xoffset = (GLfloat)xpos - lastX;
+	GLfloat yoffset = lastY - (GLfloat)ypos;
+	lastX = (GLfloat)xpos;
+	lastY = (GLfloat)ypos;
+
 	if (!window->isCursorEnabled()) {
 		mainCamera->processMouseMovement(xoffset, yoffset);
 	}
 }
 
+int random(int min, int max)
+{
+	static bool first = true;
+	if (first)
+	{
+		srand(time(NULL)); //seeding for the first time only!
+		first = false;
+	}
+	return min + rand() % (max - min);
+}

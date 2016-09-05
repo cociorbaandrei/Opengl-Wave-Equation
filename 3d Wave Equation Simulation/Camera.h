@@ -20,9 +20,10 @@ public:
 	void processKeyboardMovement(Camera_Movement direction, GLfloat deltaTime);
 	
 	glm::mat4 getViewMatrix();
-
 	glm::vec3 getFrontVector();
 	glm::vec3 getPosition();
+	glm::mat4 getProjection();
+	glm::vec3 createRay(double normalizedX, double normalizedY);
 	~Camera();
 
 private:
