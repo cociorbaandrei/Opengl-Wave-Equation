@@ -40,7 +40,7 @@ int main()
 	window->setCallback(key_callback);
 	window->setCallback(mouse_callback);
 
-	int num = 35;
+	int num = 30;
 	float worldLen = 1.f;
 
 
@@ -77,7 +77,7 @@ int main()
 		for (int j = 1; j < mesh->GetGridSize()-1; j++) {
 		
 			int x = i, y = j;
-			float ampl = 1.6f;
+			float ampl = -1.6f;
 			float x0 = num / 2;
 			float y0 = num / 2;
 			float theta = .8f;
@@ -91,6 +91,7 @@ int main()
 	float dh = .002f;
 	float dt = .0001f;
 	float timmer = 1.f;
+	float timmer2 = 4.f;
 	while (window->running())
 	{
 		window->poolEvents();
@@ -106,25 +107,30 @@ int main()
 			
 			u[currentTime][random(1, num)][random(1, num)] = -.4;
 			timmer = .15f;
+
 		}else timmer -= deltaTime;
 
 
-		for (int i = 1; i < mesh->GetGridSize() - 1; i++) {
-			for (int j = 1; j < mesh->GetGridSize() - 1; j++)
-			{
-				glm::vec3 position;
-				int x = i, y = j;
-				position.x = x;
-				position.z = y;
+		
+		if (timmer2 <= deltaTime) {
 
-				u[1 - currentTime][x][y] = 2 * u[currentTime][x][y] - u[1 - currentTime][x][y] + (dt * (u[currentTime][x + 1][y] - 2 * u[currentTime][x][y] + u[currentTime][x - 1][y]) / dh + dt * (u[currentTime][x][y + 1] - 2 * u[currentTime][x][y] + u[currentTime][x][y - 1]) / dh - dt * 2 * damping *(u[currentTime][x][y] - u[1 - currentTime][x][y])) * waveSpeed;
-				position.y = u[1 - currentTime][x][y];
-				mesh->GetVertex(i, j).position = position;
+			for (int i = 1; i < mesh->GetGridSize() - 1; i++) {
+				for (int j = 1; j < mesh->GetGridSize() - 1; j++)
+				{
+					glm::vec3 position;
+					int x = i, y = j;
+					position.x = x;
+					position.z = y;
 
+					u[1 - currentTime][x][y] = 2 * u[currentTime][x][y] - u[1 - currentTime][x][y] + (dt * (u[currentTime][x + 1][y] - 2 * u[currentTime][x][y] + u[currentTime][x - 1][y]) / dh + dt * (u[currentTime][x][y + 1] - 2 * u[currentTime][x][y] + u[currentTime][x][y - 1]) / dh - dt * 2 * damping *(u[currentTime][x][y] - u[1 - currentTime][x][y])) * waveSpeed;
+					position.y = u[1 - currentTime][x][y];
+					mesh->GetVertex(i, j).position = position;
+
+				}
 			}
-		}
-		
-		
+			timmer2 = 0.001f;
+		}else timmer2 -= deltaTime;
+
 
 		currentTime = 1 - currentTime;
 		mesh->RecalculateNormals();
