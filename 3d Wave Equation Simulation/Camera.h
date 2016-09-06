@@ -24,7 +24,7 @@ public:
 	glm::vec3 getRightVector();
 	glm::vec3 getPosition();
 	glm::mat4 getProjection();
-	glm::vec3 createRay(double normalizedX, double normalizedY);
+	glm::vec3 createRay(double mouseX, double mouseY, double z, glm::mat4 model);
 	~Camera();
 
 private:

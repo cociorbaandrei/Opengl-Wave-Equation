@@ -84,7 +84,6 @@ void MeshGrid::Draw(Window * window, Camera * camera)
 		(GLvoid*)0           // element array buffer offset
 	);
 	glBindVertexArray(0);
-	//m_shader->stopUsing();
 }
 
 MeshGrid* MeshGrid::Translate(glm::vec3 position)
@@ -154,6 +153,10 @@ glm::vec3 MeshGrid::getColor(double v, double vmin, double vmax)
 	return glm::vec3(r, g, b);
 }
 
+glm::mat4 MeshGrid::getModelMatrix()
+{
+	return m_model;
+}
 
 
 void MeshGrid::Init()
@@ -219,34 +222,56 @@ void MeshGrid::Init()
 glm::vec3 MeshGrid::getCollisionWithRay(glm::vec3 rayDir, glm::vec3 rayPos)
 {
 	for (auto face : m_faces) {
-		glm::vec3 facePos = m_vertices[face.v[0]].position + m_vertices[face.v[1]].position +  m_vertices[face.v[1]].position;
-		facePos /= 3;
-		glm::vec3 normal = m_vertices[face.v[0]].normal + m_vertices[face.v[1]].normal + m_vertices[face.v[1]].normal;
-		normal /= 3;
-		std::cout << checkFaceCollisionWithRay(glm::normalize(normal), facePos, rayPos, rayDir) << std::endl;
-		return glm::vec3(1.f);
+		float t = -1;
+		if (checkFaceCollisionWithRay(m_vertices[face.v[0]].position, m_vertices[face.v[1]].position, m_vertices[face.v[2]].position, rayPos, rayDir, &t)) {
+			return glm::vec3(rayPos + t * rayDir);
+		}
 	}
+
+	glm::vec3(0.f, 0.f, 0.f);
 }
 
-bool MeshGrid::checkFaceCollisionWithRay(glm::vec3 normal, glm::vec3 facePos, glm::vec3 rayPos, glm::vec3 rayDir)
+
+bool MeshGrid::checkFaceCollisionWithRay(glm::vec3 v1, glm::vec3 v2, glm::vec3 v3, glm::vec3 O, glm::vec3 D, float * out)
 {
-	float t = -1;
-	float denom = glm::dot(normal, rayDir);
-	if (denom < 1e-6) return false;
+	glm::vec3 e1, e2, //Edge1, Edge2
+		P, Q, T;
+	float det, inv_det, u, v, t;
+
+	//Find vectors for two edges sharing V1
+	e1 = v2 - v1;
+	e2 = v3 - v1;
+
+	//Begin calculating determinant - also used to calculate u parameter
+	P = glm::cross(D, e2);
+	det = glm::dot(e1, P);
+
+	//NOT CULLING
+	if (det > -EPSILON && det < EPSILON) return false;
+	inv_det = 1.f / det;
+
+	//calculate distance from V1 to ray origin
+	T = O - v1;
+
+	//Calculate u parameter and test bound
+	u = glm::dot(T, P) * inv_det;
+
+	//The intersection lies outside of the triangle
+	if (u < 0.f || u > 1.f) return false;
+
+	//Prepare to test v parameter
+	Q = glm::cross(T, e1);
 	
-	glm::vec3 p0l0 = facePos - rayPos;
-	t = -(glm::dot(rayPos, normal)) / denom;
+	//Calculate V parameter and test bound
+	v = glm::dot(D, Q) * inv_det;
+	//The intersection lies outside of the triangle
+	if (v < 0.f || u + v  > 1.f) return false;
 
-	glm::vec3 p = rayPos - t * rayDir;
-
-	glm::vec3 planeToRayStart = rayPos - p;
-
-	double dot = glm::dot(planeToRayStart, normal);
-	if (dot > 0) {
-		return false;
-	}
-	else {
+	t = glm::dot(e2, Q) * inv_det;
+	if (t > EPSILON) { //ray intersection
+		*out = t;
 		return true;
 	}
-
+	return false;
 }
+

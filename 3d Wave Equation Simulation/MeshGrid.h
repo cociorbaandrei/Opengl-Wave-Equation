@@ -1,6 +1,7 @@
 #ifndef MESHGRID_H
 #define MESHGRID_H
 #pragma once
+#define EPSILON 0.000001
 class GLShader;
 class Camera;
 class Window;
@@ -34,9 +35,11 @@ public:
 	Vertex& GetVertex(int i, int j);
 	GLShader* GetShader();
 	glm::vec3 getColor(double v, double vmin, double vmax);
+
+	glm::mat4 getModelMatrix();
 private:
 	
-	bool checkFaceCollisionWithRay(glm::vec3 normal, glm::vec3 facePos, glm::vec3 rayPos, glm::vec3 rayDir);
+	bool checkFaceCollisionWithRay(glm::vec3 v1, glm::vec3 v2, glm::vec3 v3, glm::vec3 O, glm::vec3 D, float* out);
 	GLuint m_vbo, m_vao, m_ebo;
 	int m_grid_size;
 	

@@ -11,8 +11,11 @@
 
 
 
-
-double normalizedX,  normalizedY;
+template <typename T>
+T clip(const T& n, const T& lower, const T& upper) {
+	return std::max(lower, std::min(n, upper));
+}
+double mouseX,  mouseY;
 GLfloat deltaTime = .0f;
 GLfloat lastFrame = .0f;
 GLfloat lastX = 400, lastY = 300, yaw, pitch;
@@ -34,8 +37,8 @@ int main()
 	window->setCallback(key_callback);
 	window->setCallback(mouse_callback);
 
-	int num = 20;
-	float worldLen = 1.f;
+	int num = 50;
+	float worldLen = 10.f;
 
 
 	MeshGrid* worldMesh = new MeshGrid(100, glm::vec3(1.f), "worldMeshShader.vert", "worldMeshShader.frag");
@@ -44,7 +47,7 @@ int main()
 
 
 
-	glm::vec3 lightPos = glm::vec3(0.f, 1.1f, 0.f);
+	glm::vec3 lightPos = glm::vec3(0.f, 1.5f, 0.f);
 	MeshGrid* mesh = new MeshGrid(num, glm::vec3(0.f, 1.f, 0.f), "shader.vert", "shader.frag");
 	mesh->Translate(glm::vec3(0.f, 1.f, 0.f))->Scale(glm::vec3(worldLen / num));
 	mesh->GetShader()->useProgram();
@@ -89,12 +92,12 @@ int main()
 
 
 	int currentTime = 1;
-	float damping = 0, waveSpeed = .5;
+	float damping = 100, waveSpeed = 6;
 	float dh = .002f;
 	float dt = .0001f;
 	float timmer = 10000.f;
 	float timmer2 = 5.f;
-	float minu = 1000;
+
 
 	GLfloat verts[] = { 0.f, 0.f, 0.f, 1.f, 1.f, 1.f };
 	GLuint vbo, vao;
@@ -112,7 +115,11 @@ int main()
 	
 		do_movement();
 
-		
+	
+	
+		glm::vec3 hit = mesh->getCollisionWithRay(mainCamera->getFrontVector(), mainCamera->getPosition());
+
+	
 		if (timmer <= deltaTime) {
 			
 			u[currentTime][random(1, num)][random(1, num)] = -.4;
@@ -120,8 +127,21 @@ int main()
 
 		}else timmer -= deltaTime;
 
+		
+		if (keys[GLFW_KEY_SPACE]) {
+			int a = clip<double>(hit.x * num / worldLen, 0, num - 1);
+			int b = clip<double>(hit.z * num / worldLen, 0, num - 1);
+			float ampl = 0.29f;
 
+			float theta = 1.8f;
 
+			for (int i = 1; i < mesh->GetGridSize() - 1; i++) {
+				for (int j = 1; j < mesh->GetGridSize() - 1; j++) {
+					u[currentTime][a][b] += exp(-((i-a)*(i-a)/theta/theta/2 + (j - b) * (j - b)/theta/theta/2)) * ampl;
+				}
+			}
+
+		}
 		if (timmer2 <= deltaTime) {
 
 			for (int i = 1; i < mesh->GetGridSize() - 1; i++) {
@@ -132,10 +152,12 @@ int main()
 					position.x = x;
 					position.z = y;
 
+			
+
 					u[1 - currentTime][x][y] = 2 * u[currentTime][x][y] - u[1 - currentTime][x][y] + (dt * (u[currentTime][x + 1][y] - 2 * u[currentTime][x][y] + u[currentTime][x - 1][y]) / dh + dt * (u[currentTime][x][y + 1] - 2 * u[currentTime][x][y] + u[currentTime][x][y - 1]) / dh - dt * 2 * damping *(u[currentTime][x][y] - u[1 - currentTime][x][y])) * waveSpeed;
 					position.y = u[1 - currentTime][x][y];
 					mesh->GetVertex(i, j).position = position;
-					mesh->GetVertex(i, j).color = mesh->getColor(position.y, -2,2);
+					mesh->GetVertex(i, j).color = mesh->getColor(position.y, -3.2,3.2);
 				}
 			}
 			timmer2 = 0.001f;
@@ -199,8 +221,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 void mouse_callback(GLFWwindow * _window, double xpos, double ypos)
 {
 
-	normalizedX = -1.0 + 2.0 * xpos / window->dimensions().x;
-	normalizedY = 1.0 - 2.0 * ypos / window->dimensions().y;
+	mouseX = xpos;
+	mouseY = ypos;
 	GLfloat xoffset = (GLfloat)xpos - lastX;
 	GLfloat yoffset = lastY - (GLfloat)ypos;
 	lastX = (GLfloat)xpos;

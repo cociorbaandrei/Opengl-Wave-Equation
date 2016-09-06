@@ -85,16 +85,31 @@ glm::mat4 Camera::getProjection()
 	return glm::perspective(glm::radians(45.0f), 8.f / 6.f, 0.01f, 100.0f);
 }
 
-glm::vec3 Camera::createRay(double normalizedX, double normalizedY)
+glm::vec3 Camera::createRay(double mouseX, double mouseY, double z,  glm::mat4 model)
 {
 	// these positions must be in range [-1, 1] (!!!), not [0, width] and [0, height]
 
 	glm::mat4 proj = this->getProjection();
-	glm::mat4 view = this->getViewMatrix();;
+	glm::mat4 view = this->getViewMatrix();
 
-	glm::mat4 invVP = glm::inverse(proj * view );
-	glm::vec4 screenPos = glm::vec4(normalizedX, normalizedY, 1.0f, 1.0f);
+	
+	float winX = mouseX;
+	float winY = 600 - mouseY;
+	float winZ = 2.0f * z - 1.0f;
+
+	glm::mat4 invVP = glm::inverse(proj * view * model);
+
+	winX = (winX) / 800 * 2.0 - 1.0;
+	winY = (winY) / 600 * 2.0 - 1.0;
+
+	glm::vec4 screenPos = glm::vec4(winX, winY, winZ, 1.0f);
+	
 	glm::vec4 worldPos =  invVP * screenPos;
+	worldPos.w = 1.0 / worldPos.w;
+
+	worldPos.x *= worldPos.w;
+	worldPos.y *= worldPos.w;
+	worldPos.z *= worldPos.w;
 
 	glm::vec3 dir = glm::normalize(glm::vec3(worldPos));
 
