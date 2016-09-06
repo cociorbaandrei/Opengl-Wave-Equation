@@ -169,6 +169,8 @@
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ray.frag" />
+    <None Include="ray.vert" />
     <None Include="shader.frag" />
     <None Include="shader.vert" />
     <None Include="worldMeshShader.frag" />

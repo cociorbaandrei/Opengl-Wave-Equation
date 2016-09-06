@@ -74,7 +74,9 @@ void MeshGrid::Draw(Window * window, Camera * camera)
 
 
 	glBindVertexArray(m_vao);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, m_vertices.size() * sizeof(Vertex), &m_vertices[0]);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+	glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(Vertex), &m_vertices[0], GL_DYNAMIC_DRAW);
+	
 	glDrawElements(
 		GL_TRIANGLES,      // mode
 		m_indices.size() * sizeof(Index),    // count
@@ -82,7 +84,7 @@ void MeshGrid::Draw(Window * window, Camera * camera)
 		(GLvoid*)0           // element array buffer offset
 	);
 	glBindVertexArray(0);
-	m_shader->stopUsing();
+	//m_shader->stopUsing();
 }
 
 MeshGrid* MeshGrid::Translate(glm::vec3 position)
@@ -153,6 +155,7 @@ glm::vec3 MeshGrid::getColor(double v, double vmin, double vmax)
 }
 
 
+
 void MeshGrid::Init()
 {
 	m_vertices.resize(m_grid_size * m_grid_size);
@@ -187,12 +190,14 @@ void MeshGrid::Init()
 
 		}
 	}
-
+	
 	glGenBuffers(1, &m_ebo);
 	glGenBuffers(1, &m_vbo);
 	glGenVertexArrays(1, &m_vao);
 
+	
 	glBindVertexArray(m_vao);
+	
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
 	glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(Vertex), &m_vertices[0], GL_DYNAMIC_DRAW);
 
@@ -201,7 +206,7 @@ void MeshGrid::Init()
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
-
+	
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, normal));
 
@@ -209,4 +214,39 @@ void MeshGrid::Init()
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, color));
 
 	glBindVertexArray(0);
+}
+
+glm::vec3 MeshGrid::getCollisionWithRay(glm::vec3 rayDir, glm::vec3 rayPos)
+{
+	for (auto face : m_faces) {
+		glm::vec3 facePos = m_vertices[face.v[0]].position + m_vertices[face.v[1]].position +  m_vertices[face.v[1]].position;
+		facePos /= 3;
+		glm::vec3 normal = m_vertices[face.v[0]].normal + m_vertices[face.v[1]].normal + m_vertices[face.v[1]].normal;
+		normal /= 3;
+		std::cout << checkFaceCollisionWithRay(glm::normalize(normal), facePos, rayPos, rayDir) << std::endl;
+		return glm::vec3(1.f);
+	}
+}
+
+bool MeshGrid::checkFaceCollisionWithRay(glm::vec3 normal, glm::vec3 facePos, glm::vec3 rayPos, glm::vec3 rayDir)
+{
+	float t = -1;
+	float denom = glm::dot(normal, rayDir);
+	if (denom < 1e-6) return false;
+	
+	glm::vec3 p0l0 = facePos - rayPos;
+	t = -(glm::dot(rayPos, normal)) / denom;
+
+	glm::vec3 p = rayPos - t * rayDir;
+
+	glm::vec3 planeToRayStart = rayPos - p;
+
+	double dot = glm::dot(planeToRayStart, normal);
+	if (dot > 0) {
+		return false;
+	}
+	else {
+		return true;
+	}
+
 }

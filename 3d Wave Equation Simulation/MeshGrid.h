@@ -26,6 +26,8 @@ public:
 	void RecalculateNormals();
 	void SetColor(glm::vec3 color);
 	void Draw(Window* window, Camera* camera);
+	void Init();
+	glm::vec3 getCollisionWithRay(glm::vec3 rayDir, glm::vec3 rayPos);
 	MeshGrid* Translate(glm::vec3 position);
 	MeshGrid* Scale(glm::vec3 size);
 	int GetGridSize();
@@ -33,7 +35,8 @@ public:
 	GLShader* GetShader();
 	glm::vec3 getColor(double v, double vmin, double vmax);
 private:
-	void Init();
+	
+	bool checkFaceCollisionWithRay(glm::vec3 normal, glm::vec3 facePos, glm::vec3 rayPos, glm::vec3 rayDir);
 	GLuint m_vbo, m_vao, m_ebo;
 	int m_grid_size;
 	

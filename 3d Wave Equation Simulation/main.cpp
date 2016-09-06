@@ -34,7 +34,7 @@ int main()
 	window->setCallback(key_callback);
 	window->setCallback(mouse_callback);
 
-	int num = 50;
+	int num = 20;
 	float worldLen = 1.f;
 
 
@@ -71,10 +71,10 @@ int main()
 		for (int j = 1; j < mesh->GetGridSize()-1; j++) {
 		
 			int x = i, y = j;
-			float ampl = 19.6f;
+			float ampl = 2.6f;
 			float x0 = num / 2;
 			float y0 = num / 2;
-			float theta = 3.8f;
+			float theta = 0.8f;
 
 			u[0][i][j] = ampl * exp(-((x-x0)*(x-x0)/2/theta/theta+(y-y0)*(y-y0)/2/theta/theta));
 			u[1][i][j] = (ampl - .3) * exp(-((x - x0)*(x - x0) / 2 / theta / theta + (y - y0)*(y - y0) / 2 / theta / theta));
@@ -93,8 +93,14 @@ int main()
 	float dh = .002f;
 	float dt = .0001f;
 	float timmer = 10000.f;
-	float timmer2 = 8.f;
+	float timmer2 = 5.f;
 	float minu = 1000;
+
+	GLfloat verts[] = { 0.f, 0.f, 0.f, 1.f, 1.f, 1.f };
+	GLuint vbo, vao;
+	
+	
+
 	while (window->running())
 	{
 		window->poolEvents();
@@ -115,7 +121,7 @@ int main()
 		}else timmer -= deltaTime;
 
 
-		
+
 		if (timmer2 <= deltaTime) {
 
 			for (int i = 1; i < mesh->GetGridSize() - 1; i++) {
@@ -143,6 +149,8 @@ int main()
 		
 		window->setWireframeMode(true);
 		worldMesh->Draw(window, mainCamera);
+
+
 		//window->setWireframeMode(false);
 		
 		window->swapBuffers();

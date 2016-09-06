@@ -73,5 +73,11 @@
     <None Include="worldMeshShader.vert">
       <Filter>Resource Files\Shaders</Filter>
     </None>
+    <None Include="ray.frag">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="ray.vert">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

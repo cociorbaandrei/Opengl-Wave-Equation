@@ -21,6 +21,7 @@ public:
 	
 	glm::mat4 getViewMatrix();
 	glm::vec3 getFrontVector();
+	glm::vec3 getRightVector();
 	glm::vec3 getPosition();
 	glm::mat4 getProjection();
 	glm::vec3 createRay(double normalizedX, double normalizedY);

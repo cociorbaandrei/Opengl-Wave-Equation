@@ -70,6 +70,11 @@ glm::vec3 Camera::getFrontVector()
 	return front;
 }
 
+glm::vec3 Camera::getRightVector()
+{
+	return right;
+}
+
 glm::vec3 Camera::getPosition()
 {
 	return this->position;
@@ -87,9 +92,9 @@ glm::vec3 Camera::createRay(double normalizedX, double normalizedY)
 	glm::mat4 proj = this->getProjection();
 	glm::mat4 view = this->getViewMatrix();;
 
-	glm::mat4 invVP = glm::inverse(proj * view);
-	glm::vec4 screenPos = glm::vec4(normalizedX, -normalizedY, 1.0f, 1.0f);
-	glm::vec4 worldPos = invVP * screenPos;
+	glm::mat4 invVP = glm::inverse(proj * view );
+	glm::vec4 screenPos = glm::vec4(normalizedX, normalizedY, 1.0f, 1.0f);
+	glm::vec4 worldPos =  invVP * screenPos;
 
 	glm::vec3 dir = glm::normalize(glm::vec3(worldPos));
 
